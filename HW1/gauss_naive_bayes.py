@@ -2,15 +2,8 @@ import math
 
 import numpy as np
 import pandas as pd
-# calculate prior probabilities of the classes
 
-from data import heights, weights, age, gender, samples, k_values
-
-num_of_men, num_of_women = np.count_nonzero(np.asarray(gender) == 'M'), np.count_nonzero(np.asarray(gender) == 'W')
-total_num_of_classes = num_of_women + num_of_men
-prior_men, prior_women = num_of_men / total_num_of_classes, num_of_women / total_num_of_classes
-
-df_dataset = pd.DataFrame({'heights': heights, 'weights': weights, 'age': age, 'gender': gender})
+from data import heights, weights, age, gender, samples
 
 
 def calculate_gaussian_probability(sample, mu, sigma):
@@ -64,6 +57,13 @@ def gaussian_naive_bayes_classification(sample, df_dataset, drop_age):
 
 
 if __name__ == '__main__':
+    # calculate prior probabilities of the classes
+    num_of_men, num_of_women = np.count_nonzero(np.asarray(gender) == 'M'), np.count_nonzero(np.asarray(gender) == 'W')
+    total_num_of_classes = num_of_women + num_of_men
+    prior_men, prior_women = num_of_men / total_num_of_classes, num_of_women / total_num_of_classes
+
+    df_dataset = pd.DataFrame({'heights': heights, 'weights': weights, 'age': age, 'gender': gender})
+
     for sample in samples:
         prediction_1 = gaussian_naive_bayes_classification(sample, df_dataset, drop_age=False)
         print("Prediction is {} ".format(prediction_1))

@@ -3,8 +3,6 @@ import pandas as pd
 
 from data import heights, weights, age, gender, samples, k_values
 
-df_dataset = pd.DataFrame({'heights': heights, 'weights': weights, 'age': age, 'gender': gender})
-
 
 def cartesian_distance(sample, inputs):
     """
@@ -56,6 +54,8 @@ def KNN_classification(sample, k, df_dataset, drop_age):
 
 
 if __name__ == '__main__':
+    df_dataset = pd.DataFrame({'heights': heights, 'weights': weights, 'age': age, 'gender': gender})
+
     for sample in samples:
         for k in k_values:
             prediction_1 = KNN_classification(sample, k, df_dataset, drop_age=False)
