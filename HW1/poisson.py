@@ -51,19 +51,22 @@ def optimize_poisson_map(dataset, alpha, beta):
     :param dataset: the dataset
     :return: optimized lambda
     """
-    MAP_l = (1 / (len(dataset) + beta)) * (np.sum(dataset) + alpha)
+    MAP_l = (1 / (len(dataset) + beta)) * (np.sum(dataset) + alpha - 1)
     return MAP_l
 
 
 if __name__ == '__main__':
     # optimize lambda parameter for MLE performance metric
     l_opt_mle = optimize_poisson_mle(data)
+    print("Optimal lambda for MLE is {}".format(l_opt_mle))
 
     # optimize lambda parameter for MLE performance metric
     l_opt_map = optimize_poisson_map(data, alpha=alpha, beta=beta)
+    print("Optimal lambda for MAP is {}".format(l_opt_map))
 
-    for sample in data:
-        prediction_mle = poisson_sample(l_opt_mle, sample)
-        prediction_map = poisson_sample(l_opt_map, sample)
-        print("Probability of sample {} is: {} using MLE metric".format(sample, prediction_mle))
-        print("Probability of sample {} is: {} using MAP metric".format(sample, prediction_map))
+    # predict probabilities for each sample in the dataset
+    # for sample in data:
+    #     prediction_mle = poisson_sample(l_opt_mle, sample)
+    #     prediction_map = poisson_sample(l_opt_map, sample)
+    #     print("Probability of sample {} is: {} using MLE metric".format(sample, prediction_mle))
+    #     print("Probability of sample {} is: {} using MAP metric".format(sample, prediction_map))

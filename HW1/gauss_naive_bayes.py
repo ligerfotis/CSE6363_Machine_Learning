@@ -16,15 +16,15 @@ def pdf_calculate(sample, feature, df_dataset):
     :param feature: feature to calulate PDF for
     :return: probability for each class
     """
-    p_height_men_mean = np.mean(df_dataset.loc[df_dataset['gender'] == 'M'][feature].values)
-    p_height_men_std = np.std(df_dataset.loc[df_dataset['gender'] == 'M'][feature].values)
-    pdf_height_men = calculate_gaussian_probability(sample, p_height_men_mean, p_height_men_std)
+    p_feature_men_mean = np.mean(df_dataset.loc[df_dataset['gender'] == 'M'][feature].values)
+    p_feature_men_std = np.std(df_dataset.loc[df_dataset['gender'] == 'M'][feature].values)
+    pdf_feature_men = calculate_gaussian_probability(sample, p_feature_men_mean, p_feature_men_std)
 
-    p_height_women_mean = np.mean(df_dataset.loc[df_dataset['gender'] == 'W'][feature].values)
-    p_height_women_std = np.std(df_dataset.loc[df_dataset['gender'] == 'W'][feature].values)
-    pdf_height_women = calculate_gaussian_probability(sample, p_height_women_mean, p_height_women_std)
+    p_feature_women_mean = np.mean(df_dataset.loc[df_dataset['gender'] == 'W'][feature].values)
+    p_feature_women_std = np.std(df_dataset.loc[df_dataset['gender'] == 'W'][feature].values)
+    pdf_feature_women = calculate_gaussian_probability(sample, p_feature_women_mean, p_feature_women_std)
 
-    return pdf_height_men, pdf_height_women
+    return pdf_feature_men, pdf_feature_women
 
 
 def gaussian_naive_bayes_classification(sample, df_dataset, drop_age):
@@ -39,6 +39,11 @@ def gaussian_naive_bayes_classification(sample, df_dataset, drop_age):
     # Calculate PDFs for each feature
     pdf_height_men, pdf_height_women = pdf_calculate(sample[0], 'heights', df_dataset)
     pdf_weight_men, pdf_weight_women = pdf_calculate(sample[1], 'weights', df_dataset)
+
+    # calculate prior probabilities of the classes
+    num_of_men, num_of_women = np.count_nonzero(np.asarray(gender) == 'M'), np.count_nonzero(np.asarray(gender) == 'W')
+    total_num_of_classes = num_of_women + num_of_men
+    prior_men, prior_women = num_of_men / total_num_of_classes, num_of_women / total_num_of_classes
 
     if drop_age:
         # P(Class|Data) = P(Data|Class) * P(Class)
@@ -57,18 +62,38 @@ def gaussian_naive_bayes_classification(sample, df_dataset, drop_age):
 
 
 if __name__ == '__main__':
-    # calculate prior probabilities of the classes
-    num_of_men, num_of_women = np.count_nonzero(np.asarray(gender) == 'M'), np.count_nonzero(np.asarray(gender) == 'W')
-    total_num_of_classes = num_of_women + num_of_men
-    prior_men, prior_women = num_of_men / total_num_of_classes, num_of_women / total_num_of_classes
 
     df_dataset = pd.DataFrame({'heights': heights, 'weights': weights, 'age': age, 'gender': gender})
 
     for sample in samples:
+        print("sample:{}".format(sample))
         prediction_1 = gaussian_naive_bayes_classification(sample, df_dataset, drop_age=False)
-        print("Prediction is {} ".format(prediction_1))
-
-        prediction_2 = gaussian_naive_bayes_classification(sample, df_dataset, drop_age=True) # assumption: gender is is the 3rd element of the sample
-        print("Prediction is {} s without using age feature".format(prediction_2))
-
+        print("\tPrediction is {}".format(prediction_1))
+        # prediction_2 = KNN_classification(sample[:2], k, df_dataset,
+        #                                   drop_age=True)  # assumption: gender is is the 3rd element of the sample
+        # print("\tPrediction is {} for k:{} number of neighbors without using age feature".format(prediction_2, k))
         print()
+
+
+    valid_predictions_all_features, valid_predictions_exclude_age = 0, 0
+
+    # test with leave-1-out training method
+    for index, test_sample in df_dataset.iterrows():
+        sample = test_sample.values[:3]  # leave the target out
+        target = test_sample.values[3]
+        prediction = gaussian_naive_bayes_classification(sample, df_dataset.drop(index), drop_age=False)
+        valid_predictions_all_features += 1 if target == prediction else 0
+        # print("Prediction:{} - Target: {} for k: {} number of neighbors".format(prediction_1, target, k))
+
+        prediction = gaussian_naive_bayes_classification(sample[:2], df_dataset.drop(index),
+                                                         drop_age=True)  # assumption: gender is is the 3rd element of the sample
+        valid_predictions_exclude_age += 1 if target == prediction else 0
+        # print("Prediction: {} - Target: {} for k:{} number of neighbors without using age feature".format(prediction_2, target, k))
+
+        # prediction = KNN_classification(sample[:2], k, df_dataset.drop(index),
+        #                                   drop_age=True)  # assumption: gender is is the 3rd element of the sample
+        # valid_predictions_all_features += 1 if target == prediction else 0
+    print("Gaussian Naive Performance")
+    print("{}/{} correct predictions using all features".format(valid_predictions_all_features, df_dataset.shape[0]))
+    print("{}/{} correct predictions excluding age".format(valid_predictions_exclude_age, df_dataset.shape[0]))
+    print()

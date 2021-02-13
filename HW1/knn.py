@@ -45,8 +45,13 @@ def KNN_classification(sample, k, df_dataset, drop_age):
 
     labels = df_dataset["gender"].values
 
+    # get the cartesian distance from each data point
     cart_distance = cartesian_distance(sample, inputs)
+
+    # create a 2D array with the 1st column being the above distances and the second corresponding label
     labeled_cart = np.vstack((cart_distance, labels))
+
+    # sort in an ascending manner the above 2D array based on the distances
     sorted_cart = labeled_cart.T[labeled_cart.T[:, 0].argsort()]
     sorted_labels = sorted_cart.T[1]
 
@@ -57,11 +62,39 @@ if __name__ == '__main__':
     df_dataset = pd.DataFrame({'heights': heights, 'weights': weights, 'age': age, 'gender': gender})
 
     for sample in samples:
+        print("sample:{}".format(sample))
         for k in k_values:
+            print("\tK:{}".format(k))
             prediction_1 = KNN_classification(sample, k, df_dataset, drop_age=False)
-            print("Prediction is {} for k:{} number of neighbors".format(prediction_1, k))
+            print("\tPrediction is {} for k:{} number of neighbors".format(prediction_1, k))
+            # prediction_2 = KNN_classification(sample[:2], k, df_dataset,
+            #                                   drop_age=True)  # assumption: gender is is the 3rd element of the sample
+            # print("\tPrediction is {} for k:{} number of neighbors without using age feature".format(prediction_2, k))
+            print()
+    print()
 
-            prediction_2 = KNN_classification(sample[:2], k, df_dataset, drop_age=True) # assumption: gender is is the 3rd element of the sample
-            print("Prediction is {} for k:{} number of neighbors without using age feature".format(prediction_2, k))
+    for k in k_values:
+        valid_predictions_all_features, valid_predictions_exclude_age = 0, 0
 
+        # test with leave-1-out training method
+        for index, test_sample in df_dataset.iterrows():
+            sample = test_sample.values[:3] # leave the target out
+            target = test_sample.values[3]
+            prediction = KNN_classification(sample, k, df_dataset.drop(index), drop_age=False)
+            valid_predictions_all_features += 1 if target == prediction else 0
+            # print("Prediction:{} - Target: {} for k: {} number of neighbors".format(prediction_1, target, k))
+
+            prediction = KNN_classification(sample[:2], k, df_dataset.drop(index), drop_age=True) # assumption: gender is is the 3rd element of the sample
+            valid_predictions_exclude_age += 1 if target == prediction else 0
+
+            # print("Prediction: {} - Target: {} for k:{} number of neighbors without using age feature".format(prediction_2, target, k))
+
+            # prediction = KNN_classification(sample[:2], k, df_dataset.drop(index),
+            #                                   drop_age=True)  # assumption: gender is is the 3rd element of the sample
+            # valid_predictions_all_features += 1 if target == prediction else 0
+        print("KNN Performance using k:{}".format(k))
+        print("{}/{} correct predictions using all features".format(valid_predictions_all_features, df_dataset.shape[0]))
+        print("{}/{} correct predictions excluding age".format(valid_predictions_exclude_age, df_dataset.shape[0]))
         print()
+
+
