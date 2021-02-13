@@ -17,20 +17,6 @@ def poisson_sample(l, k):
     return np.power(l, k) * math.exp(-l) * 1 / math.factorial(k)
 
 
-# def gamma_sample(l, alpha, beta, k):
-#     """
-#     Poisson conjugate prior
-#
-#     Calculates the probability of k events occurring in a fixed interval l (lambda)
-#     :param l: lambda; fixed interval
-#     :param alpha:
-#     :param beta:
-#     :param k: number of events
-#     :return: the probability of k occurring in l
-#     """
-#     return (np.power(beta, alpha) / math.gamma(alpha)) * np.power(l, alpha - 1) * math.exp(-beta * l)
-
-
 def optimize_poisson_mle(dataset):
     """
     Performance Metric: MLE
