@@ -98,9 +98,10 @@ for degree in range(1, max_degree + 1):
     # add the data points on the plot
     ax.scatter(train_input[:, 0], train_input[:, 1], train_labels, label='Data', color='r')
     # change the view of the 3D plot
-    ax.view_init(40, 0)
+    ax.view_init(10, 30)
     # save the figure
-    plt.savefig("linear_regression/{}_order_poly_regression.png".format(degree))
+    plt.show()
+    # plt.savefig("linear_regression/{}_order_poly_regression.png".format(degree))
 
 """""""""""
 Question c
@@ -108,7 +109,7 @@ Question c
 # load test data; input and train_labels
 test_input, test_labels = load_train_data("data/PolyTest.txt")
 
-for degree in range(1, max_degree+1):
+for degree in range(1, max_degree + 1):
     # get the polynomial feature matrix
     pol_features_train = polynomial_feature(train_input, degree)
     # fit the data to the linear regression model
@@ -121,4 +122,4 @@ for degree in range(1, max_degree+1):
     predictions = predict(pol_features_test, theta)
 
     squared_error = (np.square(predictions - test_labels)).mean(axis=0)
-    print("MSE: {} for degree {}".format(squared_error, degree))
+    print("MSE: {} for degree {}".format(round(squared_error, 4), degree))
