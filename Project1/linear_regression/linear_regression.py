@@ -82,8 +82,9 @@ for degree in range(1, max_degree + 1):
     theta = fit_analytic(pol_features, train_labels)
 
     # plot a figure containing the models plane and the dataset points
-    fig = plt.figure("Polynomial Regression")
+    fig = plt.figure("Polynomial Regression for Degree {}".format(degree))
     ax = fig.add_subplot(111, projection='3d')
+    ax.set_title("Polynomial Regression for Degree {}".format(degree))
 
     # get the polynomial feature table for the meshgrids
     pol_features_meshgrid = polynomial_feature(mesh_data, degree)
@@ -99,9 +100,12 @@ for degree in range(1, max_degree + 1):
     ax.scatter(train_input[:, 0], train_input[:, 1], train_labels, label='Data', color='r')
     # change the view of the 3D plot
     ax.view_init(10, 30)
+    ax.set_xlabel('$X1$')
+    ax.set_ylabel('$X2$')
+    ax.set_zlabel('$Y$')
     # save the figure
-    plt.show()
-    # plt.savefig("linear_regression/{}_order_poly_regression.png".format(degree))
+    # plt.show()
+    plt.savefig("linear_regression/{}_order_poly_regression.png".format(degree))
 
 """""""""""
 Question c
