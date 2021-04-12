@@ -1,6 +1,6 @@
 import math
 import numpy as np
-
+import matplotlib.pyplot as plt
 from data import data_x, labels_or, labels_xor
 
 
@@ -33,7 +33,7 @@ class NeuralNetwork:
         return self.layer2
 
     def predict(self, x):
-        return self.forward(x)
+        return self.forward(x)[0][0]
 
     def backpropagation(self, sample, label):
         self.forward(sample)
@@ -57,6 +57,8 @@ class NeuralNetwork:
 
     def train(self, data_x, labels, epochs, learning_rate=0.01):
         n_samples, n_features = data_x.shape
+        misclassified_list = []
+        correct_predictions = 0
         for e in range(epochs):
             # randomly pick a sample
             sample_idx = np.random.randint(n_samples)
@@ -64,29 +66,48 @@ class NeuralNetwork:
             label = labels[sample_idx]
 
             self.backpropagation(np.reshape(sample, (1, 3)), label)
+            correct_predictions += 1 if self.predict(sample) > 0.5 else 0
 
             self.W1 += learning_rate * self.dloss_dw1
             self.b1 += learning_rate * self.dloss_db1
             self.W2 += learning_rate * self.dloss_dw2
             self.b2 += learning_rate * self.dloss_db2
 
+            misclassified = 0
+            for sample_test, label_test in zip(data_x, labels):
+                misclassified += 1 if self.predict(sample_test) < 0.5 else 0
+            misclassified_list.append(misclassified)
+
+        return correct_predictions / epochs, misclassified_list
+
 
 epochs = 1000
-lr = 0.001
+lr = 0.01
 
 labels_or = [1 if label == 1 else 0 for label in labels_or]
 net_or = NeuralNetwork(np.asarray(data_x).shape)
-net_or.train(np.asarray(data_x), np.asarray(labels_or), epochs, lr)
-correct_preds_or = 0
-for sample in data_x:
-    correct_preds_or += 1 if net_or.predict(sample) >= 0.5 else 0
+correct_preds_or, misclassified_list_or = net_or.train(np.asarray(data_x), np.asarray(labels_or), epochs, lr)
+# for sample in data_x:
+#     correct_preds_or += 1 if net_or.predict(sample) >= 0.5 else 0
 
 labels_xor = [1 if label == 1 else 0 for label in labels_xor]
 net_xor = NeuralNetwork(np.asarray(data_x).shape)
-net_xor.train(np.asarray(data_x), np.asarray(labels_xor), epochs, lr)
-correct_preds_xor = 0
-for sample in data_x:
-    correct_preds_xor += 1 if net_xor.predict(sample) >= 0.5 else 0
+correct_preds_xor, misclassified_list_xor = net_xor.train(np.asarray(data_x), np.asarray(labels_xor), epochs, lr)
+# for sample in data_x:
+#     correct_preds_xor += 1 if net_xor.predict(sample) >= 0.5 else 0
 
-print("Neural Network Convergence:\nOR: {} correct predictions\nXOR: {} correct predictions".format(correct_preds_or,
-                                                                                                    correct_preds_xor))
+
+plt.figure()
+x = np.arange(1, epochs + 1)
+plt.xlabel("epochs")
+plt.ylabel("Misclassified samples")
+plt.plot(x, misclassified_list_or, label="or", color="blue")
+plt.plot(x, misclassified_list_xor, label="xor", color="red")
+plt.legend()
+plt.grid()
+plt.title("Epochs: {} Learning rate: {}".format(epochs, lr))
+plt.savefig("misclassification_NN.png")
+
+print("Neural Network Convergence:\nOR: {}% correct predictions\nXOR: {}% correct predictions".format(
+    correct_preds_or * 100,
+    correct_preds_xor * 100))
