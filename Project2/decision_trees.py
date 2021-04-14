@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 from math import log, e
 
-max_depth = 2
 BASE = 2
 
 
@@ -138,6 +137,7 @@ class CART:
                 node.child_x = self.build_tree(node.split_data_x, depth + 1, type='x', parent=node)
                 node.child_b = self.build_tree(node.split_data_b, depth + 1, type='b', parent=node)
 
+            self.root = node
             return node
 
         # max depth reached; make the node a leaf
@@ -162,48 +162,33 @@ class CART:
             class_p = self.predict(sample, tree.child_b)
         return class_p
 
-###
-max_depth = 2
-###
-cart = CART()
-tree = cart.build_tree(train_data, 0, type="root", parent=None)
-labels = test_data['label'].values
-x_train = test_data.loc[:, test_data.columns != 'label']
-count_correct_pred = 0
-for index, sample in x_train.iterrows():
-    prediction = cart.predict(sample, tree)
-    if prediction == labels[index]:
-        count_correct_pred += 1
-accuracy = count_correct_pred / len(labels)
-print("Prediction accuracy for max depth {} is {:.2f}%".format(max_depth, accuracy * 100))
+    def evaluate(self, data, labels):
+        count_correct_pred = 0
+        # prediction accuracy on training data
+        for index, sample in data.iterrows():
+            prediction = self.predict(sample, self.root)
+            if prediction == labels[index]:
+                count_correct_pred += 1
+        accuracy = count_correct_pred / len(labels)
+        return accuracy
 
-###
-max_depth = 3
-###
-cart = CART()
-tree = cart.build_tree(train_data, 0, type="root", parent=None)
 
-labels = test_data['label'].values
-x_train = test_data.loc[:, test_data.columns != 'label']
-count_correct_pred = 0
-for index, sample in x_train.iterrows():
-    prediction = cart.predict(sample, tree)
-    if prediction == labels[index]:
-        count_correct_pred += 1
-accuracy = count_correct_pred / len(labels)
-print("Prediction accuracy for max depth {} is {:.2f}%".format(max_depth, accuracy * 100))
+for max_depth in range(1, 10):
+    # create a CART instance
+    cart = CART()
+    # train CART
+    tree = cart.build_tree(train_data, 0, type="root", parent=None)
+    # train dataset
+    train_labels = train_data['label'].values
+    x_train = train_data.loc[:, train_data.columns != 'label']
+    # testing dataset
+    test_labels = test_data['label'].values
+    x_test = test_data.loc[:, test_data.columns != 'label']
 
-###
-max_depth = 4
-###
-cart = CART()
-tree = cart.build_tree(train_data, 0, type="root", parent=None)
-labels = test_data['label'].values
-x_train = test_data.loc[:, test_data.columns != 'label']
-count_correct_pred = 0
-for index, sample in x_train.iterrows():
-    prediction = cart.predict(sample, tree)
-    if prediction == labels[index]:
-        count_correct_pred += 1
-accuracy = count_correct_pred / len(labels)
-print("Prediction accuracy for max depth {} is {:.2f}%".format(max_depth, accuracy * 100))
+    train_accuracy = cart.evaluate(x_train, train_labels)
+
+    test_accuracy = cart.evaluate(x_test, test_labels)
+
+    print("Prediction accuracy on train data for max depth {} is {:.2f}%".format(max_depth, train_accuracy * 100))
+    print("Prediction accuracy on test data for max depth {} is {:.2f}%".format(max_depth, test_accuracy * 100))
+
