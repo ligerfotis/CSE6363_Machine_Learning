@@ -97,8 +97,9 @@ class Node:
 
 
 class CART:
-    def __init__(self):
+    def __init__(self, max_depth):
         self.root = None
+        self.max_depth = max_depth
 
     def build_tree(self, data_frame, depth, type, parent):
         if depth < 0:
@@ -108,7 +109,7 @@ class CART:
         node = Node(parent_node=parent, data_frame=data_frame, type=type)
 
         # Split recursively until maximum depth is reached.
-        if depth <= max_depth:
+        if depth <= self.max_depth:
 
             node.calc_entropy()
             # print("Entropy of node is: {}".format(node.entropy))
@@ -173,22 +174,20 @@ class CART:
         return accuracy
 
 
-for max_depth in range(1, 10):
-    # create a CART instance
-    cart = CART()
-    # train CART
-    tree = cart.build_tree(train_data, 0, type="root", parent=None)
-    # train dataset
-    train_labels = train_data['label'].values
-    x_train = train_data.loc[:, train_data.columns != 'label']
-    # testing dataset
-    test_labels = test_data['label'].values
-    x_test = test_data.loc[:, test_data.columns != 'label']
-
-    train_accuracy = cart.evaluate(x_train, train_labels)
-
-    test_accuracy = cart.evaluate(x_test, test_labels)
-
-    print("Prediction accuracy on train data for max depth {} is {:.2f}%".format(max_depth, train_accuracy * 100))
-    print("Prediction accuracy on test data for max depth {} is {:.2f}%".format(max_depth, test_accuracy * 100))
-
+# for max_depth in range(1, 10):
+#     # create a CART instance
+#     cart = CART(max_depth)
+#     # train CART
+#     tree = cart.build_tree(train_data, 0, type="root", parent=None)
+#     # train dataset
+#     train_labels = train_data['label'].values
+#     x_train = train_data.loc[:, train_data.columns != 'label']
+#     # testing dataset
+#     test_labels = test_data['label'].values
+#     x_test = test_data.loc[:, test_data.columns != 'label']
+#
+#     train_accuracy = cart.evaluate(x_train, train_labels)
+#
+#     test_accuracy = cart.evaluate(x_test, test_labels)
+#
+#     print("Prediction accuracy for max depth {} is {:.2f}% on train data and {:.2f}% in testing data".format(max_depth, train_accuracy * 100, test_accuracy * 100))
