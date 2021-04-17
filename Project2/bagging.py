@@ -22,7 +22,7 @@ def bagging(bag_num):
     list_of_models = []
     for dataset in list_of_train_datasets:
         # create a CART instance
-        cart = CART(max_depth=4)
+        cart = CART(max_depth=4, boosting=False)
         # train CART
         tree = cart.build_tree(dataset, 0, type="root", parent=None)
         list_of_models.append(cart)
@@ -46,8 +46,8 @@ def bagging(bag_num):
     accuracy = count_correct_pred / len(test_labels)
     return accuracy
 
-#
-# for bag_num in n_bagging:
-#     accuracy = bagging(bag_num)
-#     print("Bagging for {} times. Accuracy:{}".format(bag_num, accuracy))
+
+for bag_num in n_bagging:
+    accuracy = bagging(bag_num)
+    print("Bagging for {} times. Accuracy:{}".format(bag_num, accuracy))
 
