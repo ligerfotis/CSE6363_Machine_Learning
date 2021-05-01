@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from math import log, e
+from math import e
 
 BASE = 2
 
