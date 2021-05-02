@@ -3,8 +3,10 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression
 import pandas as pd
 
+# the logistic regression function
 logisticRegr_semi = LogisticRegression()
 
+# iterate for different k's
 for k in range(7):
     print("k:{}".format(k))
     x_data_labeled = np.array([sample[0] for sample in dataset_labeled])
